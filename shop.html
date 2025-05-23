@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cosmetics Shopping Site - Full Flow</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    /* Scrollbar for cart & modal */
+    #cart-sidebar::-webkit-scrollbar, #product-modal::-webkit-scrollbar {
+      width: 8px;
+    }
+    #cart-sidebar::-webkit-scrollbar-thumb, #product-modal::-webkit-scrollbar-thumb {
+      background-color: rgba(107, 114, 128, 0.5);
+      border-radius: 4px;
+    }
+    /* Ensure cart sidebar is visible */
+    #cart-sidebar {
+      z-index: 50; /* Ensure it appears above other elements */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow sticky top-0 z-30">
+    <div class="container mx-auto flex justify-between items-center p-4">
+      <div class="text-2xl font-bold cursor-pointer">GlowBeauty</div>
+      <div class="hidden md:flex space-x-8 text-gray-700 font-semibold items-center">
+        <a href="#home" class="hover:text-pink-600">Home</a>
+        <a href="#products" class="hover:text-pink-600">Products</a>
+        <button id="cart-button" class="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition relative">
+          Cart <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-2 text-xs font-bold">0</span>
+        </button>
+      </div>
+      <button id="mobile-menu-btn" class="md:hidden focus:outline-none" aria-label="Toggle menu">
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden bg-white border-t md:hidden">
+      <a href="#home" class="block px-4 py-3 border-b hover:bg-gray-100">Home</a>
+      <a href="#products" class="block px-4 py-3 border-b hover:bg-gray-100">Products</a>
+      <button id="cart-button-mobile" class="w-full text-left px-4 py-3 hover:bg-gray-100">Cart (<span id="cart-count-mobile">0</span>)</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="bg-gradient-to-r from-pink-500 via-red-400 to-pink-600 text-white text-center py-28 px-4">
+    <h1 class="text-5xl md:text-6xl font-extrabold mb-4">Glow with Confidence</h1>
+    <p class="text-xl max-w-3xl mx-auto mb-8 md:mb-12">Discover top-notch cosmetics & skincare from the best brands.</p>
+    <a href="#products" class="inline-block bg-white text-pink-600 font-bold px-8 py-3 rounded shadow hover:bg-pink-50 transition">Shop Now</a>
+  </section>
+
+  <!-- Products Section with Filters -->
+  <section id="products" class="container mx-auto py-16 px-4 flex flex-col md:flex-row gap-8">
+    <!-- Filters Sidebar -->
+    <aside id="filters-sidebar" class="md:w-64 bg-white p-6 rounded-lg shadow-md sticky top-24 self-start">
+      <div id="filters-toggle-btn" class="mb-4 font-semibold cursor-pointer select-none">Filters &#x25BC;</div>
+      <div id="filters-content" class="space-y-6">
+
+        <!-- Brand Filter -->
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Brand</h3>
+          <div class="space-y-2">
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="brand" value="Radiance" class="brand-filter" checked />
+              <span class="ml-2 select-none">Radiance</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="brand" value="BlushCo" class="brand-filter" checked />
+              <span class="ml-2 select-none">BlushCo</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="brand" value="GlowInc" class="brand-filter" checked />
+              <span class="ml-2 select-none">GlowInc</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Price Filter -->
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Price</h3>
+          <div class="space-y-2">
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" name="price" value="all" class="price-filter" checked />
+              <span class="ml-2 select-none">All</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" name="price" value="under20" class="price-filter" />
+              <span class="ml-2 select-none">Under $20</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" name="price" value="20to40" class="price-filter" />
+              <span class="ml-2 select-none">$20 to $40</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" name="price" value="above40" class="price-filter" />
+              <span class="ml-2 select-none">Above $40</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Products Grid -->
+    <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" id="products-grid">
+      <!-- Product Cards inserted by JS -->
+    </div>
+  </section>
+
+  <!-- Product Detail Modal -->
+  <div id="product-modal" tabindex="-1" aria-hidden="true" aria-labelledby="modal-title" role="dialog" class="fixed inset-0 hidden bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
+      <button id="modal-close" aria-label="Close modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="md:w-1/2">
+          <img id="modal-image" src="" alt="Product image" class="rounded-lg w-full h-auto object-cover"/>
+        </div>
+        <div class="md:w-1/2 flex flex-col">
+          <h3 id="modal-name" class="text-3xl font-bold mb-4"></h3>
+          <p id="modal-description" class="mb-4 text-gray-700"></p>
+          <p id="modal-price" class="text-xl font-semibold mb-6 text-pink-700"></p>
+          <label for="size-select" class="font-semibold mb-2">Select Shade / Size:</label>
+          <select id="size-select" class="border rounded px-3 py-2 mb-6 max-w-xs"></select>
+          <button id="modal-add-cart" class="bg-pink-600 text-white py-3 rounded hover:bg-pink-700 transition font-semibold max-w-xs">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <aside id="cart-sidebar" class="fixed right-0 top-0 w-80 max-w-full h-full bg-white shadow-lg p-6 transform translate-x-full transition-transform duration-300 overflow-auto flex flex-col" aria-label="Shopping cart">
+    <h2 class="text-2xl font-bold mb-4 flex justify-between items-center">
+      <span>Shopping Cart</span>
+      <button id="cart-close" aria-label="Close cart" class="text-gray-600 hover:text-gray-900 text-2xl font-bold">&times;</button>
+    </h2>
+    <div id="cart-items" class="space-y-4 flex-grow" role="list">
+      <!-- Items inserted here -->
+    </div>
+    <div class="mt-4 border-t pt-4">
+      <div class="flex justify-between font-semibold text-lg mb-4">
+        <span>Total:</span>
+        <span>$<span id="cart-total">0.00</span></span>
+      </div>
+
+      <!-- Checkout Step 1: Delivery Details -->
+      <div id="checkout-form" class="space-y-4">
+        <h3 class="text-xl font-bold mb-2">Delivery Details</h3>
+        <form id="delivery-form" class="space-y-3">
+          <input type="text" id="name" placeholder="Full Name" required class="w-full border rounded px-3 py-2" />
+          <input type="email" id="email" placeholder="Email Address" required class="w-full border rounded px-3 py-2" />
+          <input type="tel" id="phone" placeholder="Phone Number" required class="w-full border rounded px-3 py-2" />
+          <textarea id="address" placeholder="Delivery Address" required class="w-full border rounded px-3 py-2" rows="3"></textarea>
+
+          <label for="delivery-method" class="font-semibold">Delivery Method:</label>
+          <select id="delivery-method" required class="w-full border rounded px-3 py-2">
+            <option value="standard">Standard (3-5 days) - $5.00</option>
+            <option value="express">Express (1-2 days) - $15.00</option>
+            <option value="pickup">Store Pickup - Free</option>
+          </select>
+        </form>
+      </div>
+
+      <!-- Checkout Step 2: Payment Options -->
+      <div id="payment-section" class="space-y-4 mt-6 hidden">
+        <h3 class="text-xl font-bold mb-2">Payment Options</h3>
+        <form id="payment-form" class="space-y-3">
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="radio" name="payment" value="credit-card" required />
+            <span class="ml-2 select-none">Credit / Debit Card</span>
+          </label>
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="radio" name="payment" value="paypal" />
+            <span class="ml-2 select-none">PayPal</span>
+          </label>
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="radio" name="payment" value="cash" />
+            <span class="ml-2 select-none">Cash on Delivery</span>
+          </label>
+
+          <div id="card-details" class="space-y-3 mt-2 hidden">
+            <input type="text" id="card-name" placeholder="Name on Card" class="w-full border rounded px-3 py-2" />
+            <input type="text" id="card-number" placeholder="Card Number" class="w-full border rounded px-3 py-2" maxlength="19" />
+            <div class="flex gap-2">
+              <input type="text" id="card-expiry" placeholder="MM/YY" class="w-1/2 border rounded px-3 py-2" maxlength="5" />
+              <input type="text" id="card-cvc" placeholder="CVC" class="w-1/2 border rounded px-3 py-2" maxlength="3" />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-between mt-6">
+        <button id="back-to-delivery" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition hidden">Back</button>
+        <button id="checkout-btn" class="bg-green-600 text-white py-2 px-6 rounded hover:bg-green-700 transition font-semibold disabled:opacity-50" disabled>Next</button>
+      </div>
+    </div>
+
+    <!-- Order Confirmation -->
+    <div id="order-confirmation" class="hidden mt-6 text-center">
+      <h3 class="text-2xl font-bold text-green-700 mb-4">Thank you for your order!</h3>
+      <p class="mb-6">Your order has been placed successfully. You will receive an email confirmation shortly.</p>
+      <button id="close-confirmation" class="bg-pink-600 text-white py-2 px-6 rounded hover:bg-pink-700 transition font-semibold">Continue Shopping</button>
+    </div>
+  </aside>
+
+  <!-- Cart Overlay -->
+  <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+<script>
+(() => {
+  // Products data array with full info and images
+  const products = [
+    {
+      name: "Hydrating Lipstick",
+      price: 19.99,
+      description: "Soft, moisturizing lipstick with vibrant colors.",
+      sizes: ["Red", "Pink", "Nude"],
+      image: "image.png",
+      brand: "Radiance"
+    },
+    {
+      name: "Velvet Matte Foundation",
+      price: 42.00,
+      description: "Long-lasting matte foundation with velvety finish.",
+      sizes: ["Light", "Medium", "Tan", "Dark"],
+      image: "image1.png",
+      brand: "BlushCo"
+    },
+    {
+      name: "Refreshing Face Mist",
+      price: 15.50,
+      description: "Soothing and refreshing face mist for glowing skin.",
+      sizes: ["100ml", "200ml"],
+      image: "image2.png",
+      brand: "GlowInc"
+    },
+    {
+      name: "Silky Eye Shadow Palette",
+      price: 35.75,
+      description: "Smooth, blendable shades perfect for day and night.",
+      sizes: ["Neutral", "Vibrant", "Smoky"],
+      image: "image3.png",
+      brand: "Radiance"
+    },
+    {
+      name: "Nourishing Night Cream",
+      price: 55.00,
+      description: "Deeply hydrating night cream with natural ingredients.",
+      sizes: ["50ml"],
+      image: "image4.png",
+      brand: "BlushCo"
+    },
+    {
+      name: "Gentle Facial Cleanser",
+      price: 22.40,
+      description: "Cleanses gently without stripping natural oils.",
+      sizes: ["150ml", "300ml"],
+      image: "image5.png",
+      brand: "GlowInc"
+    },
+
+    {
+  name: "Nourishing Hand Cream",
+  price: 18.75,
+  description: "Rich, moisturizing hand cream with natural extracts for soft and smooth hands.",
+  sizes: ["75ml", "150ml"],
+  image: "image6.png",
+  brand: "GlowInc"
+}
+  ];
+
+  // State variables
+  let filteredProducts = [...products];
+  let cart = []; // {product, shade/size, quantity}
+
+  // DOM Elements
+  const productsGrid = document.getElementById("products-grid");
+  const cartButton = document.getElementById("cart-button");
+  const cartButtonMobile = document.getElementById("cart-button-mobile");
+  const cartSidebar = document.getElementById("cart-sidebar");
+  const cartOverlay = document.getElementById("cart-overlay");
+  const cartCloseBtn = document.getElementById("cart-close");
+  const cartCount = document.getElementById("cart-count");
+  const cartCountMobile = document.getElementById("cart-count-mobile");
+  const cartItemsContainer = document.getElementById("cart-items");
+  const cartTotalElem = document.getElementById("cart-total");
+
+  const filtersSidebar = document.getElementById("filters-sidebar");
+  const filtersToggleBtn = document.getElementById("filters-toggle-btn");
+  const filtersContent = document.getElementById("filters-content");
+
+  const productModal = document.getElementById("product-modal");
+  const modalCloseBtn = document.getElementById("modal-close");
+  const modalImage = document.getElementById("modal-image");
+  const modalName = document.getElementById("modal-name");
+  const modalDescription = document.getElementById("modal-description");
+  const modalPrice = document.getElementById("modal-price");
+  const sizeSelect = document.getElementById("size-select");
+  const modalAddCartBtn = document.getElementById("modal-add-cart");
+
+  // Checkout elements
+  const deliveryForm = document.getElementById("delivery-form");
+  const checkoutBtn = document.getElementById("checkout-btn");
+  const backToDeliveryBtn = document.getElementById("back-to-delivery");
+  const paymentSection = document.getElementById("payment-section");
+  const paymentForm = document.getElementById("payment-form");
+  const cardDetails = document.getElementById("card-details");
+  const orderConfirmation = document.getElementById("order-confirmation");
+  const closeConfirmationBtn = document.getElementById("close-confirmation");
+
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+
+  // Current product selected for modal add to cart
+  let currentModalProduct = null;
+
+  // Utility: format price to 2 decimals
+  function formatPrice(price) {
+    return price.toFixed(2);
+  }
+
+  // Render products grid based on filteredProducts
+  function renderProducts() {
+    productsGrid.innerHTML = "";
+    if (filteredProducts.length === 0) {
+      productsGrid.innerHTML = "<p class='text-center text-gray-500 col-span-full'>No products found.</p>";
+      return;
+    }
+    filteredProducts.forEach((p, idx) => {
+      const card = document.createElement("article");
+      card.className = "bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer flex flex-col";
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `View details of ${p.name}`);
+
+      card.innerHTML = `
+        <img src="${p.image}" alt="${p.name}" class="rounded-t-lg object-cover w-full h-48"/>
+        <div class="p-4 flex flex-col flex-grow">
+          <h4 class="font-semibold text-lg mb-2">${p.name}</h4>
+          <p class="text-pink-600 font-bold mb-4">$${formatPrice(p.price)}</p>
+          <button class="mt-auto bg-pink-600 text-white py-2 rounded hover:bg-pink-700 transition font-semibold add-to-cart-btn" data-index="${idx}">
+            Add to Cart
+          </button>
+        </div>
+      `;
+      productsGrid.appendChild(card);
+
+      // Open modal on clicking anywhere on card except the button
+      card.addEventListener("click", (e) => {
+        if (e.target.classList.contains("add-to-cart-btn")) return;
+        openProductModal(p);
+      });
+
+      card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        openProductModal(p);
+      });
+
+      // Keyboard accessible
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openProductModal(p);
+        }
+      });
+    });
+  }
+
+  // Render cart count badges
+  function updateCartCount() {
+    const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+    cartCount.textContent = totalQuantity;
+    cartCountMobile.textContent = totalQuantity;
+    cartCount.style.display = totalQuantity > 0 ? "inline-block" : "none";
+    cartCountMobile.style.display = totalQuantity > 0 ? "inline-block" : "none";
+  }
+
+  // Render cart items in sidebar
+  function renderCart() {
+    cartItemsContainer.innerHTML = "";
+    if (cart.length === 0) {
+      cartItemsContainer.innerHTML = "<p class='text-center text-gray-500'>Your cart is empty.</p>";
+      checkoutBtn.disabled = true;
+      return;
+    }
+    checkoutBtn.disabled = false;
+    cart.forEach((item, idx) => {
+      const { product, shade, quantity } = item;
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "flex items-center gap-4 border-b pb-4";
+
+      itemDiv.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" class="w-16 h-16 rounded object-cover flex-shrink-0" />
+        <div class="flex flex-col flex-grow min-w-0">
+          <h4 class="font-semibold text-lg truncate" title="${product.name}">${product.name}</h4>
+          <p class="text-gray-600 text-sm">Shade/Size: <span class="font-semibold">${shade}</span></p>
+          <p class="text-pink-600 font-semibold mt-1">$${formatPrice(product.price)}</p>
+          <div class="flex items-center gap-2 mt-2">
+            <button class="quantity-btn bg-gray-200 hover:bg-gray-300 px-2 rounded" data-action="decrease" data-index="${idx}" aria-label="Decrease quantity">−</button>
+            <span class="font-semibold min-w-[20px] text-center">${quantity}</span>
+            <button class="quantity-btn bg-gray-200 hover:bg-gray-300 px-2 rounded" data-action="increase" data-index="${idx}" aria-label="Increase quantity">+</button>
+            <button class="remove-btn ml-auto text-red-600 hover:text-red-800" data-index="${idx}" aria-label="Remove item">Remove</button>
+          </div>
+        </div>
+      `;
+
+      cartItemsContainer.appendChild(itemDiv);
+    });
+    updateCartTotal();
+  }
+
+  // Update total price in cart sidebar
+  function updateCartTotal() {
+    const total = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+    cartTotalElem.textContent = formatPrice(total);
+  }
+
+  // Open product modal and fill details
+  function openProductModal(product) {
+    currentModalProduct = product;
+    modalImage.src = product.image;
+    modalName.textContent = product.name;
+    modalDescription.textContent = product.description;
+    modalPrice.textContent = `$${formatPrice(product.price)}`;
+    sizeSelect.innerHTML = "";
+
+    product.sizes.forEach(s => {
+      const option = document.createElement("option");
+      option.value = s;
+      option.textContent = s;
+      sizeSelect.appendChild(option);
+    });
+
+    productModal.classList.remove("hidden");
+    productModal.focus();
+  }
+
+  // Close product modal
+  function closeProductModal() {
+    productModal.classList.add("hidden");
+    currentModalProduct = null;
+  }
+
+  // Add product with shade/size to cart
+  function addToCart(product, shade) {
+    const existingIndex = cart.findIndex(item => item.product.name === product.name && item.shade === shade);
+    if (existingIndex !== -1) {
+      cart[existingIndex].quantity++;
+    } else {
+      cart.push({ product, shade, quantity: 1 });
+    }
+    updateCartCount();
+    renderCart();
+  }
+
+  // Show cart sidebar
+  function openCartSidebar() {
+    cartSidebar.classList.remove("translate-x-full");
+    cartOverlay.classList.remove("hidden");
+    cartSidebar.focus();
+  }
+
+  // Hide cart sidebar
+  function closeCartSidebar() {
+    cartSidebar.classList.add("translate-x-full");
+    cartOverlay.classList.add("hidden");
+    // Reset checkout UI to delivery details
+    resetCheckoutUI();
+  }
+
+  // Filters handling
+  function applyFilters() {
+    const checkedBrands = [...document.querySelectorAll(".brand-filter:checked")].map(i => i.value);
+    const selectedPrice = document.querySelector(".price-filter:checked").value;
+
+    filteredProducts = products.filter(p => {
+      if (!checkedBrands.includes(p.brand)) return false;
+
+      if (selectedPrice === "under20") return p.price < 20;
+      if (selectedPrice === "20to40") return p.price >= 20 && p.price <= 40;
+      if (selectedPrice === "above40") return p.price > 40;
+      return true;
+    });
+
+    renderProducts();
+  }
+
+  // Checkout form validation helper
+  function validateDeliveryForm() {
+    return deliveryForm.checkValidity();
+  }
+
+  // Payment form validation helper
+  function validatePaymentForm() {
+    const paymentValue = paymentForm.payment.value;
+    if (!paymentValue) return false;
+    if (paymentValue === "credit-card") {
+      // Validate card fields are filled
+      return (
+        paymentForm["card-name"].value.trim() !== "" &&
+        paymentForm["card-number"].value.trim().length >= 13 &&
+        paymentForm["card-expiry"].value.trim().length === 5 &&
+        paymentForm["card-cvc"].value.trim().length === 3
+      );
+    }
+    return true;
+  }
+
+  // Show/hide card details input based on payment method
+  function toggleCardDetails() {
+    if (paymentForm.payment.value === "credit-card") {
+      cardDetails.classList.remove("hidden");
+    } else {
+      cardDetails.classList.add("hidden");
+    }
+  }
+
+  // Reset checkout UI to initial state
+  function resetCheckoutUI() {
+    paymentSection.classList.add("hidden");
+    deliveryForm.querySelectorAll("input,textarea,select").forEach(i => i.disabled = false);
+    checkoutBtn.textContent = "Next";
+    backToDeliveryBtn.classList.add("hidden");
+    orderConfirmation.classList.add("hidden");
+    checkoutBtn.disabled = cart.length === 0;
+  }
+
+  // Event listeners setup
+  function setupListeners() {
+    // Mobile menu toggle
+    mobileMenuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // Filters toggle for mobile
+    filtersToggleBtn.addEventListener("click", () => {
+      filtersContent.classList.toggle("hidden");
+      filtersToggleBtn.innerHTML = filtersContent.classList.contains("hidden") ? "Filters &#x25BC;" : "Filters &#x25B2;";
+    });
+
+    // Filters inputs change
+    document.querySelectorAll(".brand-filter, .price-filter").forEach(input => {
+      input.addEventListener("change", applyFilters);
+    });
+
+    // Product modal close
+    modalCloseBtn.addEventListener("click", closeProductModal);
+
+    // Modal add to cart
+    modalAddCartBtn.addEventListener("click", () => {
+      if (!currentModalProduct) return;
+      const selectedShade = sizeSelect.value;
+      addToCart(currentModalProduct, selectedShade);
+      closeProductModal();
+      openCartSidebar();
+    });
+
+    // Cart button open
+    cartButton.addEventListener("click", openCartSidebar);
+    cartButtonMobile.addEventListener("click", openCartSidebar);
+
+    // Cart close button
+    cartCloseBtn.addEventListener("click", closeCartSidebar);
+    cartOverlay.addEventListener("click", closeCartSidebar);
+
+    // Cart item buttons (event delegation)
+    cartItemsContainer.addEventListener("click", e => {
+      if (e.target.classList.contains("quantity-btn")) {
+        const idx = +e.target.dataset.index;
+        if (e.target.dataset.action === "increase") {
+          cart[idx].quantity++;
+        } else if (e.target.dataset.action === "decrease" && cart[idx].quantity > 1) {
+          cart[idx].quantity--;
+        }
+        renderCart();
+        updateCartCount();
+      } else if (e.target.classList.contains("remove-btn")) {
+        const idx = +e.target.dataset.index;
+        cart.splice(idx, 1);
+        renderCart();
+        updateCartCount();
+      }
+    });
+
+    // Checkout button click - handles multi-step form
+    checkoutBtn.addEventListener("click", () => {
+      if (!paymentSection.classList.contains("hidden")) {
+        // Payment step, validate and finalize order
+        if (!validatePaymentForm()) {
+          alert("Please fill all payment details correctly.");
+          return;
+        }
+        // Simulate order success
+        deliveryForm.querySelectorAll("input,textarea,select").forEach(i => i.disabled = true);
+        paymentForm.querySelectorAll("input").forEach(i => i.disabled = true);
+        checkoutBtn.disabled = true;
+        backToDeliveryBtn.classList.add("hidden");
+        checkoutBtn.classList.add("hidden");
+        orderConfirmation.classList.remove("hidden");
+        // Clear cart
+        cart.length = 0;
+        updateCartCount();
+        renderCart();
+      } else {
+        // Delivery details step
+        if (!validateDeliveryForm()) {
+          alert("Please fill all delivery details correctly.");
+          return;
+        }
+        // Move to payment section
+        paymentSection.classList.remove("hidden");
+        deliveryForm.querySelectorAll("input,textarea,select").forEach(i => i.disabled = true);
+        checkoutBtn.textContent = "Place Order";
+        backToDeliveryBtn.classList.remove("hidden");
+      }
+    });
+
+    // Back button to delivery form
+    backToDeliveryBtn.addEventListener("click", () => {
+      paymentSection.classList.add("hidden");
+      deliveryForm.querySelectorAll("input,textarea,select").forEach(i => i.disabled = false);
+      paymentForm.querySelectorAll("input").forEach(i => i.checked = false);
+      cardDetails.classList.add("hidden");
+      checkoutBtn.textContent = "Next";
+      backToDeliveryBtn.classList.add("hidden");
+    });
+
+    // Payment form radio change - toggle card inputs
+    paymentForm.addEventListener("change", e => {
+      if (e.target.name === "payment") {
+        toggleCardDetails();
+      }
+    });
+
+    // Close order confirmation button
+    closeConfirmationBtn.addEventListener("click", () => {
+      closeCartSidebar();
+      resetCheckoutUI();
+    });
+
+    // Keyboard accessibility: ESC to close modal or cart
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        if (!productModal.classList.contains("hidden")) {
+          closeProductModal();
+        } else if (!cartSidebar.classList.contains("translate-x-full")) {
+          closeCartSidebar();
+        }
+      }
+    });
+  }
+
+  // Initial render
+  renderProducts();
+  updateCartCount();
+  renderCart();
+  resetCheckoutUI();
+  setupListeners();
+
+})();
+</script>
+
+</body>
+</html>
